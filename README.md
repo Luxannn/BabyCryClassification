@@ -23,4 +23,4 @@ To use the model for classifying baby cries, you can go to out streamlit website
 1. Clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/yourusername/your-repo-name.git
+   git clone https://github.com/Luxannn/BabyCryClassification.git
