@@ -2,22 +2,22 @@ import streamlit as st
 import time
 import random
 
-st.title("Baby Cry Predictor")
+st.title("Пешгӯии Гиряи Кӯдак")
 
-st.subheader("Press 'Start' and make a baby cry sound:")
-start_button = st.button("Start")
+st.subheader("Тугмаи 'Оғоз' -ро пахш кунед ва садои гиряи кӯдакро барангезед:")
+start_button = st.button("Оғоз")
 
 if start_button:
-    st.text("Recording... (pretending to listen for 5 seconds)")
+    st.text("Сабт карда истодааст...")
     # Simulate 5-second "listening" like your original code
     time.sleep(5)
-    st.text("Finished recording")
+    st.text("Сабт анҷом ёфт")
 
-    # Random prediction to mimic your model's output
+    # Random prediction in Tajik to mimic your model's output
     try:
-        cries = ["Hungry", "Tired", "Pain", "Bored", "Scared", "Happy"]
+        cries = ["Гушна", "Хастагӣ", "Дард", "Малолат", "Тарс", "Хушҳол"]
         prediction = random.choice(cries)
-        st.subheader("Prediction:")
-        st.write(f"The baby's cry corresponds to: {prediction}")
+        st.subheader("Пешгӯӣ:")
+        st.write(f"Гиряи кӯдак ба ин мувофиқ аст: {prediction}")
     except Exception as e:
-        st.error(f"Oops, something broke: {str(e)}")
+        st.error(f"Хато: {str(e)}")
