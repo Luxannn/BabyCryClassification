@@ -4,6 +4,8 @@ import pickle
 import librosa
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, RTCConfiguration
+import av
 
 # Load the trained model
 try:
@@ -13,28 +15,51 @@ except FileNotFoundError:
     st.error("Model file 'BabyCryModel.pkl' not found. Please upload it to the repo.")
     st.stop()
 
-st.title("Baby Cry Predictor")
+# WebRTC configuration (optional, improves connection)
+RTC_CONFIG = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
-# File upload for audio
-st.subheader("Upload a WAV file to predict the baby's cry:")
-uploaded_file = st.file_uploader("Choose a WAV file", type=["wav"])
+# Audio processor class to handle real-time audio
+class AudioProcessor(AudioProcessorBase):
+    def __init__(self):
+        self.audio_buffer = []
 
-if uploaded_file is not None:
-    try:
-        # Load audio directly with librosa
-        audio, sr = librosa.load(uploaded_file, sr=44100)
-        st.text("Audio loaded successfully!")
+    def recv(self, frame):
+        # Convert audio frame to numpy array
+        audio = frame.to_ndarray().flatten().astype(np.float64)
+        self.audio_buffer.append(audio)
 
-        # Extract MFCC features
-        mfccs = librosa.feature.mfcc(y=audio, sr=sr)
-        mfccs_mean = np.mean(mfccs, axis=1)
+        # Process 5 seconds of audio (adjust based on your needs)
+        if len(self.audio_buffer) * frame.sample_rate / 1000 > 5:  # Roughly 5 seconds
+            full_audio = np.concatenate(self.audio_buffer)
+            self.audio_buffer = []  # Reset buffer
 
-        # Make prediction with the model
-        prediction = model.predict([mfccs_mean])
+            # Extract MFCC features
+            mfccs = librosa.feature.mfcc(y=full_audio, sr=frame.sample_rate)
+            mfccs_mean = np.mean(mfccs, axis=1)
 
-        # Display results
-        st.subheader("Prediction:")
-        st.write(f"The baby's cry corresponds to: {prediction[0]}")
+            # Predict with the model
+            prediction = model.predict([mfccs_mean])
+            st.session_state["prediction"] = prediction[0]
 
-    except Exception as e:
-        st.error(f"Error during audio processing: {str(e)}")
+        return frame
+
+st.title("Baby Cry Predictor (Real-Time)")
+
+# Instructions
+st.subheader("Allow microphone access and start listening for baby cries:")
+st.write("This app will listen in real-time and predict after 5 seconds of audio.")
+
+# WebRTC streamer for real-time audio
+webrtc_ctx = webrtc_streamer(
+    key="audio",
+    mode="sendonly",
+    audio_processor_factory=AudioProcessor,
+    rtc_configuration=RTC_CONFIG,
+    media_stream_constraints={"audio": True, "video": False},
+    async_processing=True,
+)
+
+# Display prediction
+if "prediction" in st.session_state:
+    st.subheader("Prediction:")
+    st.write(f"The baby's cry corresponds to: {st.session_state['prediction']}")
