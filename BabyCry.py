@@ -1,15 +1,23 @@
 import streamlit as st
+import time
 import random
 
-st.title("Baby Cry Predictor (Random AF)")
+st.title("Baby Cry Predictor")
 
-st.subheader("Hit the button for a wild guess:")
-start_button = st.button("Predict Some Shit")
+st.subheader("Press 'Start' and make a baby cry sound:")
+start_button = st.button("Start")
 
 if start_button:
-    # Fake predictions, just random crap
-    cries = ["Hungry", "Tired", "Pain", "Bored", "Scared", "Happy"]
-    prediction = random.choice(cries)
-    st.text("Thinking real hard...")
-    st.subheader("Prediction:")
-    st.write(f"This baby’s probably: {prediction}")
+    st.text("Recording... (pretending to listen for 5 seconds)")
+    # Simulate 5-second "listening" like your original code
+    time.sleep(5)
+    st.text("Finished recording")
+
+    # Random prediction to mimic your model's output
+    try:
+        cries = ["Hungry", "Tired", "Pain", "Bored", "Scared", "Happy"]
+        prediction = random.choice(cries)
+        st.subheader("Prediction:")
+        st.write(f"The baby's cry corresponds to: {prediction}")
+    except Exception as e:
+        st.error(f"Oops, something broke: {str(e)}")
