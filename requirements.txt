@@ -1,5 +1,6 @@
 pandas>=0.19
 scikit-learn>=0.22.1
-PyAudio==0.2.14
 librosa
 streamlit
+streamlit-webrtc
+pyav
