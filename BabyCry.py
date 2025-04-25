@@ -4,7 +4,7 @@ import pickle
 import librosa
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, RTCConfiguration
+from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, RTCConfiguration, WebRtcMode
 import av
 
 # Load the trained model
@@ -15,10 +15,10 @@ except FileNotFoundError:
     st.error("Model file 'BabyCryModel.pkl' not found. Please upload it to the repo.")
     st.stop()
 
-# WebRTC configuration (optional, improves connection)
+# WebRTC configuration for better connection
 RTC_CONFIG = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
-# Audio processor class to handle real-time audio
+# Audio processor class for real-time audio
 class AudioProcessor(AudioProcessorBase):
     def __init__(self):
         self.audio_buffer = []
@@ -28,8 +28,8 @@ class AudioProcessor(AudioProcessorBase):
         audio = frame.to_ndarray().flatten().astype(np.float64)
         self.audio_buffer.append(audio)
 
-        # Process 5 seconds of audio (adjust based on your needs)
-        if len(self.audio_buffer) * frame.sample_rate / 1000 > 5:  # Roughly 5 seconds
+        # Process 5 seconds of audio
+        if len(self.audio_buffer) * frame.sample_rate / 1000 > 5:  # ~5 seconds
             full_audio = np.concatenate(self.audio_buffer)
             self.audio_buffer = []  # Reset buffer
 
@@ -52,7 +52,7 @@ st.write("This app will listen in real-time and predict after 5 seconds of audio
 # WebRTC streamer for real-time audio
 webrtc_ctx = webrtc_streamer(
     key="audio",
-    mode="sendonly",
+    mode=WebRtcMode.SENDONLY,  # Fixed: Use enum instead of string
     audio_processor_factory=AudioProcessor,
     rtc_configuration=RTC_CONFIG,
     media_stream_constraints={"audio": True, "video": False},
